@@ -14,7 +14,11 @@ const routes = [
     component: Admin,
     children: [
       {
-        path: '/restaurant',
+        path: '/',
+        redirect: 'restaurant',
+      },
+      {
+        path: 'restaurant',
         name: 'Restaurant',
         component: Restaurant,
       },

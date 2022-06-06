@@ -27,6 +27,7 @@ api.interceptors.response.use(
     return response.data;
   },
   // ? 如果响应错误
+  // ? 自定义错误,把error进行再封装
   (error) => Promise.reject(error),
 );
 
