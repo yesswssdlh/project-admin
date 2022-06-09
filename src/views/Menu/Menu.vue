@@ -38,8 +38,8 @@
         label="状态"
         width="180"
       >
-        <template>
-          <el-switch />
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.abvailable" />
         </template>
       </el-table-column>
     </el-table>
@@ -49,7 +49,7 @@
 <script>
 // import _ from 'lodash';
 import { getRestaurant } from '@/api/restaurant';
-import getMenu from '@/api/menu';
+import { getMenu } from '@/api/menu';
 
 export default {
   name: 'Menu',
