@@ -41,6 +41,7 @@
         <template slot-scope="scope">
           <el-switch
             v-model="scope.row.available"
+            @change="reviseAvailable(scope.row)"
           />
         </template>
       </el-table-column>
@@ -49,9 +50,9 @@
 </template>
 
 <script>
-// import _ from 'lodash';
+import _ from 'lodash';
 import { getRestaurant } from '@/api/restaurant';
-import { getMenu } from '@/api/menu';
+import { getMenu, postAvailable } from '@/api/menu';
 
 export default {
   name: 'Menu',
@@ -91,7 +92,6 @@ export default {
         // eslint-disable-next-line no-underscore-dangle
           id: this.value, page: this.page, limit: this.limit, keyword: this.keyword,
         });
-        console.log(this.menus.list);
       } catch (error) {
         this.$message.error(error.message);
       } finally {
@@ -99,15 +99,24 @@ export default {
       }
     },
     // 发送请求，修改开关状态
-    // async changeAvailable({_id,}) {
-    //   try {
-    //     await postAvailable();
-    //   } catch (error) {
-
-    //   }filly{
-
-    //   }
-    // },
+    async reviseAvailable(food) {
+      try {
+        this.loading = true;
+        await postAvailable({
+          // eslint-disable-next-line no-underscore-dangle
+          id: food._id,
+          data: {
+            ..._.omit(food, '_id'),
+          },
+        });
+      } catch (error) {
+        this.$message.error(error.message);
+      } finally {
+        // 修改完之后还是要重新获取一下菜单数据
+        await this.loadMenus();
+        this.loading = false;
+      }
+    },
   },
 };
 </script>

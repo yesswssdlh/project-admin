@@ -7,7 +7,7 @@ export async function getMenu({
   return result;
 }
 
-// 获取available数据
+// 修改available数据
 export async function postAvailable(data) {
   const result = await request.post('/api/food', data);
   return result;

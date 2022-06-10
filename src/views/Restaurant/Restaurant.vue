@@ -153,7 +153,7 @@ export default {
       limit: 10,
       // 控制dialog是否显示
       dialogVisible: false,
-      // dialog里面的内容
+      // dialog里面的内容，表格每一行的数据
       dialogData: {},
       // dialog里面输入框旁边下拉框的默认属性
       lang: 'zh-CN',
