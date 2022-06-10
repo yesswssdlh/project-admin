@@ -39,7 +39,9 @@
         width="180"
       >
         <template slot-scope="scope">
-          <el-switch v-model="scope.row.abvailable" />
+          <el-switch
+            v-model="scope.row.available"
+          />
         </template>
       </el-table-column>
     </el-table>
@@ -58,6 +60,9 @@ export default {
       restaurants: [],
       menus: [],
       value: '',
+      page: 1,
+      limit: 10,
+      keyword: '',
     };
   },
   computed: {
@@ -78,12 +83,13 @@ export default {
         this.loading = false;
       }
     },
+    // 发送请求获取菜单信息
     async loadMenus() {
       try {
         this.loading = true;
         this.menus = await getMenu({
         // eslint-disable-next-line no-underscore-dangle
-          id: this.value, page: 1, limit: 10, keyword: '',
+          id: this.value, page: this.page, limit: this.limit, keyword: this.keyword,
         });
         console.log(this.menus.list);
       } catch (error) {
@@ -92,6 +98,16 @@ export default {
         this.loading = false;
       }
     },
+    // 发送请求，修改开关状态
+    // async changeAvailable({_id,}) {
+    //   try {
+    //     await postAvailable();
+    //   } catch (error) {
+
+    //   }filly{
+
+    //   }
+    // },
   },
 };
 </script>

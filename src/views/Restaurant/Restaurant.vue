@@ -249,7 +249,7 @@ export default {
         this.loading = false;
         // 这里是重新获取restaurant，渲染到页面，
         // 因为如果不重新获取，当请求出现错误的时候，开关是不会回退到对应的状态的
-        this.loadRestaurant();
+        await this.loadRestaurant();
       }
     },
     // 打开操作框
