@@ -134,13 +134,33 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
         /> -->
+        <div
+          v-for="(item,index) in dialogData.time"
+          :key="week[index]"
+        >
+          <span>{{ week[index] }}</span>
+          <el-time-picker
+            v-model="dialogData.time[index]"
+            is-range
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            placeholder="选择时间范围"
+          />
+        </div>
+
+        <el-button @click="changeRestaurant">
+          确定
+        </el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { getRestaurant, getClosed, getTags } from '@/api/restaurant';
+import {
+  getRestaurant, getClosed, getTags, updateRestaurant,
+} from '@/api/restaurant';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
@@ -167,6 +187,7 @@ export default {
       time: moment().locale('zh-cn').tz('America/New_York').format('YYYY-MM-DD HH:mm:ss dddd'),
       // 计时器
       timer: null,
+      week: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'],
       // value1: [new Date(2000, 10, 10, 10, 10), new Date(2000, 10, 11, 10, 10)],
     };
   },
@@ -195,6 +216,8 @@ export default {
         const restaurants = await getRestaurant();
         // 数据重构，通过给原始数据添加上isClose属性，然后再通过该属性判断开关是否打开
         this.restaurants = this.setClosed(restaurants);
+
+        this.restaurants = this.setTime(restaurants);
       } catch (error) {
         this.$message.error(error.message);
       } finally {
@@ -226,6 +249,31 @@ export default {
         } else {
           this.$set(item, 'isClosed', false);
         }
+      });
+      return restaurants;
+    },
+    // ? 重构时间格式
+    setTime(restaurants) {
+      // * [{ start: 10, end: 20 },
+      //  * { start: 10, end: 20 }];
+      // ? ====>
+      // * [ [new Date(xxx), new Date(xxx)],
+      //   *[ new Date(xxx), new Date(xxx)],
+      // * ]
+      _.forEach(restaurants, (item) => {
+        const array = [];
+        _.forEach(this.week, (weekDay, index) => {
+          const start = _.get(item, `hours[${index}].start`, 0);
+          const end = _.get(item, `hours[${index}].end`, 0);
+
+          const startDate = moment().startOf('day').add(start, 'minutes').toDate();
+          // console.log('startDate: ', startDate);
+          const endDate = moment().startOf('day').add(end, 'minutes').toDate();
+          // console.log('endDate: ', endDate);
+          array.push([startDate, endDate]);
+        });
+        // eslint-disable-next-line no-param-reassign
+        item.time = array;
       });
       return restaurants;
     },
@@ -277,6 +325,39 @@ export default {
       this.timer = setInterval(() => {
         this.time = moment().locale('zh-cn').tz('America/New_York').format('YYYY-MM-DD HH:mm:ss dddd');
       }, 1000);
+    },
+    async changeRestaurant() {
+      const array = [];
+      // ? 前端重构了后端给的数据
+      this.dialogData.time.forEach((item) => {
+        // * [ start , end ]
+        // * ===> [ { start : 123 , end : 120 }]
+        const startDate = moment(item[0]);
+
+        const endDate = moment(item[1]);
+        const start = startDate.hour() * 60 + startDate.minute();
+        const end = endDate.hour() * 60 + endDate.minute();
+
+        array.push({ start, end });
+      });
+      this.dialogData.hours = array;
+
+      try {
+        this.loading = true;
+        const data = _.pick(this.dialogData, ['hours', 'name', 'tags']);
+        console.log('data: ', data);
+        await updateRestaurant({
+          data,
+          // eslint-disable-next-line no-underscore-dangle
+          id: this.dialogData._id,
+        });
+        this.dialogVisible = false;
+      } catch (error) {
+        console.log(error);
+      } finally {
+        await this.loadRestaurant();
+        this.loading = false;
+      }
     },
   },
 

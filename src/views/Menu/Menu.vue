@@ -35,7 +35,7 @@
         width="220"
       >
         <template
-          slot="header"
+          #header
         >
           <el-input
             v-model="keyword"
@@ -173,13 +173,20 @@ export default {
       await this.loadMenus();
     },
     // 输入框搜索
-    async getKeywordData() {
-      console.log('getKeywordData: ');
-      this.page = 1;
-      this.limit = 10;
-      await this.loadMenus();
+    async getKeywordData(v) {
+      try {
+        await getMenu({
+        // eslint-disable-next-line no-underscore-dangle
+          id: this.selected, page: this.page, limit: this.limit, keyword: v,
+        });
+        this.page = 1;
+        this.limit = 10;
+      } catch (error) {
+        this.$message.error(error.message);
+      } finally {
+        await this.loadMenus();
+      }
     },
-
     // 下拉列表搜索
     filterMethod(v) {
       if (!v) {

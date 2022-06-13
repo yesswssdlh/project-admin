@@ -17,3 +17,7 @@ export async function getTags() {
   const result = await request.get('/api/tags');
   return result;
 }
+export async function updateRestaurant(data) {
+  const result = await request.post('/api/restaurant', data);
+  return result;
+}
